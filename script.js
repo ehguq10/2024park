@@ -8,6 +8,19 @@ class BreathingTimer {
         this.onTick = null;
         this.onComplete = null;
         this.breathCount = 0;
+        this.sounds = {
+            tick: new Audio('sounds/tick.mp3'),
+            set: new Audio('sounds/set.mp3'),
+            complete: new Audio('sounds/complete.mp3')
+        };
+        
+        this.sounds.tick.volume = 0.5;
+        this.sounds.set.volume = 0.5;
+        this.sounds.complete.volume = 0.7;
+        
+        // 각 사운드의 시작 지점 설정
+        this.sounds.tick.currentTime = 0.1;
+        this.sounds.set.currentTime = 0.2;
     }
 
     setup(seconds, sets) {
@@ -34,14 +47,22 @@ class BreathingTimer {
                     
                     if (this.currentSet <= 0) {
                         clearInterval(this.timerId);
+                        this.sounds.complete.play();
                         if (this.onComplete) this.onComplete();
                         return;
                     }
+                    
+                    this.sounds.set.currentTime = 0.2;
+                    this.sounds.set.play();
                 }
 
                 this.currentTime = this.timePerSet;
             }
 
+            // tick 사운드 재생 전에 시작 지점 재설정
+            this.sounds.tick.currentTime = 0.1;
+            this.sounds.tick.play();
+            
             if (this.onTick) {
                 this.onTick(this.currentTime, this.currentSet, this.totalSets, this.breathCount);
             }
@@ -53,6 +74,12 @@ class BreathingTimer {
         if (this.timerId) {
             clearInterval(this.timerId);
             this.timerId = null;
+            
+            // 모든 재생 중인 사운드 정지
+            Object.values(this.sounds).forEach(sound => {
+                sound.pause();
+                sound.currentTime = 0;
+            });
         }
     }
 }
@@ -127,4 +154,12 @@ document.addEventListener('keydown', (e) => {
             stopBtn.click();
         }
     }
+});
+
+// 사운드 미리 로드
+window.addEventListener('DOMContentLoaded', () => {
+    const breathTimer = new BreathingTimer();
+    Object.values(breathTimer.sounds).forEach(sound => {
+        sound.load();
+    });
 });
