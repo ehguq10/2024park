@@ -9,10 +9,10 @@ class BreathingTimer {
         this.onComplete = null;
         this.breathCount = 0;
         this.sounds = {
-            tick: new Audio('sounds/tick.mp3'),
-            set: new Audio('sounds/set.mp3'),
-            complete: new Audio('sounds/complete.mp3')
-        };
+        tick: new Audio('2024park/sounds/tick.mp3'),
+        set: new Audio('2024park/sounds/set.mp3'),
+        complete: new Audio('2024park/sounds/complete.mp3')
+    };
         
         this.sounds.tick.volume = 0.5;
         this.sounds.set.volume = 0.5;
