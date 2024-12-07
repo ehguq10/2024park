@@ -8,50 +8,58 @@ class BreathingTimer {
         this.onTick = null;
         this.onComplete = null;
         this.breathCount = 0;
-        
-        // 사운드 초기화를 생성자에서 하지 않고 별도 메서드로 분리
         this.sounds = null;
+        this.soundsEnabled = false;
     }
 
-    // 사운드 초기화를 위한 새로운 메서드
     initSounds() {
-        this.sounds = {
-            tick: new Audio('/2024park/sounds/tick.mp3'),
-            set: new Audio('/2024park/sounds/set.mp3'),
-            complete: new Audio('/2024park/sounds/complete.mp3')
-        };
-        
-        // 볼륨 설정
-        this.sounds.tick.volume = 0.5;
-        this.sounds.set.volume = 0.5;
-        this.sounds.complete.volume = 0.7;
-        
-        // 각 사운드 프리로드
-        Object.values(this.sounds).forEach(sound => {
-            sound.load();
-            // 사용자 상호작용 컨텍스트에서 빈 재생 시도
-            sound.play().then(() => {
-                sound.pause();
-                sound.currentTime = 0;
-            }).catch(() => {});
+        return new Promise((resolve) => {
+            this.sounds = {
+                tick: new Audio('/2024park/sounds/tick.mp3'),
+                set: new Audio('/2024park/sounds/set.mp3'),
+                complete: new Audio('/2024park/sounds/complete.mp3')
+            };
+
+            // 볼륨 설정
+            this.sounds.tick.volume = 0.5;
+            this.sounds.set.volume = 0.5;
+            this.sounds.complete.volume = 0.7;
+
+            // 모든 사운드에 대해 한 번씩 재생 시도
+            Promise.all(Object.values(this.sounds).map(sound => {
+                return sound.play()
+                    .then(() => {
+                        sound.pause();
+                        sound.currentTime = 0;
+                        return true;
+                    })
+                    .catch(() => false);
+            })).then(results => {
+                this.soundsEnabled = results.some(result => result);
+                resolve();
+            });
         });
     }
 
-    setup(seconds, sets) {
-        this.timePerSet = seconds;
-        this.totalSets = sets;
-        this.currentSet = sets;
-        this.currentTime = seconds;
-        this.breathCount = 0;
+    async playSound(sound) {
+        if (!this.soundsEnabled || !sound) return;
+        
+        try {
+            sound.currentTime = 0;
+            await sound.play();
+        } catch (error) {
+            console.log('Sound play failed:', error);
+        }
     }
 
+    // start 메서드 수정
     start() {
         if (this.currentSet <= 0) {
             if (this.onComplete) this.onComplete();
             return;
         }
 
-        this.timerId = setInterval(async () => {
+        this.timerId = setInterval(() => {
             if (this.currentTime <= 0) {
                 this.breathCount++;
                 
@@ -61,21 +69,18 @@ class BreathingTimer {
                     
                     if (this.currentSet <= 0) {
                         clearInterval(this.timerId);
-                        await this.playSound(this.sounds.complete);
+                        this.playSound(this.sounds.complete);
                         if (this.onComplete) this.onComplete();
                         return;
                     }
                     
-                    this.sounds.set.currentTime = 0.2;
-                    await this.playSound(this.sounds.set);
+                    this.playSound(this.sounds.set);
                 }
 
                 this.currentTime = this.timePerSet;
             }
 
-            // tick 사운드 재생
-            this.sounds.tick.currentTime = 0.1;
-            await this.playSound(this.sounds.tick);
+            this.playSound(this.sounds.tick);
             
             if (this.onTick) {
                 this.onTick(this.currentTime, this.currentSet, this.totalSets, this.breathCount);
@@ -94,15 +99,6 @@ class BreathingTimer {
                 sound.pause();
                 sound.currentTime = 0;
             });
-        }
-    }
-
-    // start 메서드에서 사운드 재생 전에 promise 처리 추가
-    async playSound(sound) {
-        try {
-            await sound.play();
-        } catch (error) {
-            console.log('Sound play failed:', error);
         }
     }
 }
@@ -151,12 +147,7 @@ startBtn.addEventListener('click', async () => {
     const sets = parseInt(setsInput.value);
     
     if (seconds > 0 && sets > 0) {
-        // 사운드 초기화를 클릭 이벤트 내에서 수행
-        breathTimer.initSounds();
-        
-        // 잠시 대기 후 타이머 시작
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
+        await breathTimer.initSounds();
         breathTimer.setup(seconds, sets);
         breathTimer.start();
         startBtn.disabled = true;
