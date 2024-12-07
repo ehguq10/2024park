@@ -14,30 +14,40 @@ class BreathingTimer {
 
     initSounds() {
         return new Promise((resolve) => {
-            this.sounds = {
-                tick: new Audio('/2024park/sounds/tick.mp3'),
-                set: new Audio('/2024park/sounds/set.mp3'),
-                complete: new Audio('/2024park/sounds/complete.mp3')
-            };
+            try {
+                console.log('Creating Audio objects...');
+                this.sounds = {
+                    tick: new Audio('sounds/tick.mp3'),
+                    set: new Audio('sounds/set.mp3'),
+                    complete: new Audio('sounds/complete.mp3')
+                };
 
-            // 볼륨 설정
-            this.sounds.tick.volume = 0.5;
-            this.sounds.set.volume = 0.5;
-            this.sounds.complete.volume = 0.7;
+                console.log('Setting volumes...');
+                this.sounds.tick.volume = 0.5;
+                this.sounds.set.volume = 0.5;
+                this.sounds.complete.volume = 0.7;
 
-            // 모든 사운드에 대해 한 번씩 재생 시도
-            Promise.all(Object.values(this.sounds).map(sound => {
-                return sound.play()
-                    .then(() => {
-                        sound.pause();
-                        sound.currentTime = 0;
-                        return true;
-                    })
-                    .catch(() => false);
-            })).then(results => {
-                this.soundsEnabled = results.some(result => result);
+                console.log('Attempting to play sounds...');
+                Promise.all(Object.values(this.sounds).map(sound => {
+                    return sound.play()
+                        .then(() => {
+                            sound.pause();
+                            sound.currentTime = 0;
+                            return true;
+                        })
+                        .catch((error) => {
+                            console.error('Sound play failed:', error);
+                            return false;
+                        });
+                })).then(results => {
+                    console.log('Play attempts results:', results);
+                    this.soundsEnabled = results.some(result => result);
+                    resolve();
+                });
+            } catch (error) {
+                console.error('Error in initSounds:', error);
                 resolve();
-            });
+            }
         });
     }
 
@@ -54,12 +64,24 @@ class BreathingTimer {
 
     // start 메서드 수정
     start() {
+        console.log('Start method called:', {
+            currentSet: this.currentSet,
+            timePerSet: this.timePerSet,
+            totalSets: this.totalSets
+        });
+
         if (this.currentSet <= 0) {
+            console.log('No sets remaining');
             if (this.onComplete) this.onComplete();
             return;
         }
 
         this.timerId = setInterval(() => {
+            console.log('Timer tick:', {
+                currentTime: this.currentTime,
+                currentSet: this.currentSet,
+                breathCount: this.breathCount
+            });
             if (this.currentTime <= 0) {
                 this.breathCount++;
                 
@@ -156,20 +178,31 @@ startBtn.addEventListener('click', async () => {
     const seconds = parseInt(secondsInput.value);
     const sets = parseInt(setsInput.value);
     
+    console.log('Button clicked:', { seconds, sets });
+
     if (seconds > 0 && sets > 0) {
         try {
             console.log('Initializing sounds...');
             await breathTimer.initSounds();
             console.log('Sounds initialized');
             
+            console.log('Setting up timer...');
             breathTimer.setup(seconds, sets);
+            console.log('Timer setup complete');
+            
+            console.log('Starting timer...');
             breathTimer.start();
+            console.log('Timer started');
+            
             startBtn.disabled = true;
             stopBtn.disabled = false;
             timeDisplay.classList.add('active');
         } catch (error) {
             console.error('Error starting timer:', error);
+            alert('타이머 시작 중 오류가 발생했습니다.');
         }
+    } else {
+        console.log('Invalid input values');
     }
 });
 
