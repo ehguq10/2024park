@@ -14,6 +14,14 @@ class BreathingTimer {
             complete: new Audio('/2024park/sounds/complete.mp3')
         };
         
+        // 사운드 초기화 및 프리로드
+        Object.values(this.sounds).forEach(sound => {
+            sound.load(); // 사운드 프리로드
+            // 사용자 상호작용 없이도 재생되도록 설정
+            sound.autoplay = true;
+            sound.muted = false;
+        });
+        
         this.sounds.tick.volume = 0.5;
         this.sounds.set.volume = 0.5;
         this.sounds.complete.volume = 0.7;
@@ -37,7 +45,7 @@ class BreathingTimer {
             return;
         }
 
-        this.timerId = setInterval(() => {
+        this.timerId = setInterval(async () => {
             if (this.currentTime <= 0) {
                 this.breathCount++;
                 
@@ -47,21 +55,21 @@ class BreathingTimer {
                     
                     if (this.currentSet <= 0) {
                         clearInterval(this.timerId);
-                        this.sounds.complete.play();
+                        await this.playSound(this.sounds.complete);
                         if (this.onComplete) this.onComplete();
                         return;
                     }
                     
                     this.sounds.set.currentTime = 0.2;
-                    this.sounds.set.play();
+                    await this.playSound(this.sounds.set);
                 }
 
                 this.currentTime = this.timePerSet;
             }
 
-            // tick 사운드 재생 전에 시작 지점 재설정
+            // tick 사운드 재생
             this.sounds.tick.currentTime = 0.1;
-            this.sounds.tick.play();
+            await this.playSound(this.sounds.tick);
             
             if (this.onTick) {
                 this.onTick(this.currentTime, this.currentSet, this.totalSets, this.breathCount);
@@ -80,6 +88,15 @@ class BreathingTimer {
                 sound.pause();
                 sound.currentTime = 0;
             });
+        }
+    }
+
+    // start 메서드에서 사운드 재생 전에 promise 처리 추가
+    async playSound(sound) {
+        try {
+            await sound.play();
+        } catch (error) {
+            console.log('Sound play failed:', error);
         }
     }
 }
