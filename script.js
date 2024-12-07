@@ -1,28 +1,20 @@
 <<<<<<< HEAD
 class BreathingTimer {
     constructor() {
-        this.timePerSet = 0;
-        this.totalSets = 0;
-        this.currentSet = 0;
-        this.currentTime = 0;
-        this.timerId = null;
-        this.onTick = null;
-        this.onComplete = null;
-        this.breathCount = 0;
-        this.sounds = {
-            tick: new Audio('sounds/tick.mp3'),
-            set: new Audio('sounds/set.mp3'),
-            complete: new Audio('sounds/complete.mp3')
-        };
-        
-        this.sounds.tick.volume = 0.5;
-        this.sounds.set.volume = 0.5;
-        this.sounds.complete.volume = 0.7;
-        
-        // 각 사운드의 시작 지점 설정
-        this.sounds.tick.currentTime = 0.1;
-        this.sounds.set.currentTime = 0.2;
-    }
+    this.sounds = {
+        tick: new Audio('/2024park/sounds/tick.mp3'),
+        set: new Audio('/2024park/sounds/set.mp3'),
+        complete: new Audio('/2024park/sounds/complete.mp3')
+    };
+    
+    this.sounds.tick.volume = 0.5;
+    this.sounds.set.volume = 0.5;
+    this.sounds.complete.volume = 0.7;
+    
+    // 각 사운드의 시작 지점 설정
+    this.sounds.tick.currentTime = 0.1;
+    this.sounds.set.currentTime = 0.2;
+}
 
     setup(seconds, sets) {
         this.timePerSet = seconds;
