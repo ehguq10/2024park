@@ -14,14 +14,6 @@ class BreathingTimer {
             complete: new Audio('/2024park/sounds/complete.mp3')
         };
         
-        // 사운드 초기화 및 프리로드
-        Object.values(this.sounds).forEach(sound => {
-            sound.load(); // 사운드 프리로드
-            // 사용자 상호작용 없이도 재생되도록 설정
-            sound.autoplay = true;
-            sound.muted = false;
-        });
-        
         this.sounds.tick.volume = 0.5;
         this.sounds.set.volume = 0.5;
         this.sounds.complete.volume = 0.7;
@@ -29,6 +21,15 @@ class BreathingTimer {
         // 각 사운드의 시작 지점 설정
         this.sounds.tick.currentTime = 0.1;
         this.sounds.set.currentTime = 0.2;
+    }
+
+    initSounds() {
+        // 각 사운드에 대해 빈 재생을 시도
+        Object.values(this.sounds).forEach(sound => {
+            sound.play().catch(() => {});
+            sound.pause();
+            sound.currentTime = 0;
+        });
     }
 
     setup(seconds, sets) {
@@ -145,6 +146,7 @@ startBtn.addEventListener('click', () => {
     const sets = parseInt(setsInput.value);
     
     if (seconds > 0 && sets > 0) {
+        breathTimer.initSounds();
         breathTimer.setup(seconds, sets);
         breathTimer.start();
         startBtn.disabled = true;
