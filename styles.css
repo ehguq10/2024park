@@ -127,3 +127,46 @@ button:disabled {
 .container.completed {
     animation: complete-flash 1s;
 }
+
+@media screen and (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+
+    .container {
+        width: 90%;
+        padding: 1rem;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .input-container {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .time {
+        font-size: 3rem;
+    }
+
+    .sets {
+        font-size: 1rem;
+    }
+
+    button {
+        padding: 0.5rem 1.5rem;
+    }
+
+    .shortcut-hint {
+        display: none;
+    }
+}
+
+@media (hover: none) {
+    button {
+        touch-action: manipulation;
+    }
+}
