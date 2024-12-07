@@ -147,12 +147,19 @@ startBtn.addEventListener('click', async () => {
     const sets = parseInt(setsInput.value);
     
     if (seconds > 0 && sets > 0) {
-        await breathTimer.initSounds();
-        breathTimer.setup(seconds, sets);
-        breathTimer.start();
-        startBtn.disabled = true;
-        stopBtn.disabled = false;
-        timeDisplay.classList.add('active');
+        try {
+            console.log('Initializing sounds...');
+            await breathTimer.initSounds();
+            console.log('Sounds initialized');
+            
+            breathTimer.setup(seconds, sets);
+            breathTimer.start();
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            timeDisplay.classList.add('active');
+        } catch (error) {
+            console.error('Error starting timer:', error);
+        }
     }
 });
 
@@ -174,4 +181,15 @@ document.addEventListener('keydown', (e) => {
             stopBtn.click();
         }
     }
+});
+
+// 터치 이벤트 지원
+startBtn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    startBtn.click();
+});
+
+stopBtn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    stopBtn.click();
 });
