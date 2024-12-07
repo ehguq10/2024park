@@ -101,9 +101,19 @@ class BreathingTimer {
             });
         }
     }
+
+    // setup 메서드 추가
+    setup(seconds, sets) {
+        this.timePerSet = seconds;
+        this.totalSets = sets;
+        this.currentSet = sets;
+        this.currentTime = seconds;
+        this.breathCount = 0;
+    }
 }
 
 // DOM 요소
+const container = document.querySelector('.container');
 const startBtn = document.getElementById('startBtn');
 const stopBtn = document.getElementById('stopBtn');
 const secondsInput = document.getElementById('seconds');
