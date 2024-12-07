@@ -12,6 +12,14 @@ class BreathingTimer {
         this.soundsEnabled = false;
     }
 
+    setup(seconds, sets) {
+        this.timePerSet = seconds;
+        this.totalSets = sets;
+        this.currentSet = sets;
+        this.currentTime = seconds;
+        this.breathCount = 0;
+    }
+
     initSounds() {
         return new Promise((resolve) => {
             try {
@@ -122,15 +130,6 @@ class BreathingTimer {
                 sound.currentTime = 0;
             });
         }
-    }
-
-    // setup 메서드 추가
-    setup(seconds, sets) {
-        this.timePerSet = seconds;
-        this.totalSets = sets;
-        this.currentSet = sets;
-        this.currentTime = seconds;
-        this.breathCount = 0;
     }
 }
 
