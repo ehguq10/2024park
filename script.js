@@ -8,27 +8,32 @@ class BreathingTimer {
         this.onTick = null;
         this.onComplete = null;
         this.breathCount = 0;
+        
+        // 사운드 초기화를 생성자에서 하지 않고 별도 메서드로 분리
+        this.sounds = null;
+    }
+
+    // 사운드 초기화를 위한 새로운 메서드
+    initSounds() {
         this.sounds = {
             tick: new Audio('/2024park/sounds/tick.mp3'),
             set: new Audio('/2024park/sounds/set.mp3'),
             complete: new Audio('/2024park/sounds/complete.mp3')
         };
         
+        // 볼륨 설정
         this.sounds.tick.volume = 0.5;
         this.sounds.set.volume = 0.5;
         this.sounds.complete.volume = 0.7;
         
-        // 각 사운드의 시작 지점 설정
-        this.sounds.tick.currentTime = 0.1;
-        this.sounds.set.currentTime = 0.2;
-    }
-
-    initSounds() {
-        // 각 사운드에 대해 빈 재생을 시도
+        // 각 사운드 프리로드
         Object.values(this.sounds).forEach(sound => {
-            sound.play().catch(() => {});
-            sound.pause();
-            sound.currentTime = 0;
+            sound.load();
+            // 사용자 상호작용 컨텍스트에서 빈 재생 시도
+            sound.play().then(() => {
+                sound.pause();
+                sound.currentTime = 0;
+            }).catch(() => {});
         });
     }
 
@@ -141,12 +146,17 @@ breathTimer.onComplete = () => {
     }, 1000);
 };
 
-startBtn.addEventListener('click', () => {
+startBtn.addEventListener('click', async () => {
     const seconds = parseInt(secondsInput.value);
     const sets = parseInt(setsInput.value);
     
     if (seconds > 0 && sets > 0) {
+        // 사운드 초기화를 클릭 이벤트 내에서 수행
         breathTimer.initSounds();
+        
+        // 잠시 대기 후 타이머 시작
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
         breathTimer.setup(seconds, sets);
         breathTimer.start();
         startBtn.disabled = true;
@@ -173,12 +183,4 @@ document.addEventListener('keydown', (e) => {
             stopBtn.click();
         }
     }
-});
-
-// 사운드 미리 로드
-window.addEventListener('DOMContentLoaded', () => {
-    const breathTimer = new BreathingTimer();
-    Object.values(breathTimer.sounds).forEach(sound => {
-        sound.load();
-    });
 });
